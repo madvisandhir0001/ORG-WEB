@@ -2,15 +2,17 @@ import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../utils/firebase';
+import { auth, users } from '../utils/firebase';
 import { Avatar, Button } from '@material-ui/core';
 import { useHistory } from 'react-router';
 // import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import { Link as ATag } from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+
 const Header = () => {
     const [user] = useAuthState(auth);
     const history = useHistory();
+    const [userData, setUserData] = useState([]);
     const [showSettings, setShowSettings] = useState(false);
     const settingsRef = useRef();
     const useOutsideAlerter = ref => {
@@ -24,7 +26,15 @@ const Header = () => {
             return () => document.removeEventListener("mousedown", handleClickOutside)
         }, [ref]);
     }
+
+    useEffect(() => {
+        if (user) {
+            users.doc(user.email).onSnapshot(snapshot => setUserData(snapshot.data()));
+        }
+    }, [user]);
+
     useOutsideAlerter(settingsRef);
+
     return (
         <Container>
             <Brand>
@@ -47,16 +57,16 @@ const Header = () => {
                 </Auth>
                 :
                 <User onMouseEnter={() => setShowSettings(true)} onClick={() => setShowSettings(true)}>
-                    <Avatar style={{ width: '30px', height: '30px' }} src={user?.photoURL} />
+                    <Avatar style={{ width: '30px', height: '30px' }} src={userData?.profilePic} />
                     <ArrowDropDownIcon style={{ color: 'gray' }} />
                 </User>
             }
             {showSettings &&
                 <Settings onClick={() => setShowSettings(false)} ref={settingsRef}>
+                    <p onClick={() => history.push('/user/dashboard/profile')}>Dashboard</p>
+                    <p onClick={() => history.push('/user/dashboard/profile')}>Profile</p>
                     <p onClick={() => history.push('/user/dashboard/account')}>Account Settings</p>
                     <p onClick={() => history.push('/user/contact')}>Help</p>
-                    <p onClick={() => history.push('/user/dashboard/profile')}>Edit Profile</p>
-                    <p onClick={() => history.push('/user/dashboard/profile')}>Profile</p>
                     <p onClick={() => auth.signOut()}>Logout</p>
                 </Settings>
             }

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import InputField from './InputField'
 import TitleIcon from '@material-ui/icons/Title';
@@ -8,31 +8,83 @@ import LocationOnIcon from '@material-ui/icons/LocationOn';
 import PhoneIcon from '@material-ui/icons/Phone';
 import MailIcon from '@material-ui/icons/Mail';
 import PinDropIcon from '@material-ui/icons/PinDrop';
-import DialpadIcon from '@material-ui/icons/Dialpad';
 import PhoneAndroidIcon from '@material-ui/icons/PhoneAndroid';
+import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import { Button, CircularProgress } from '@material-ui/core';
+import { auth, users } from '../utils/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import Error from './Error';
+import { useHistory } from 'react-router';
 
-const RegisterCompany = () => {
-    const [data, setData] = useState({
+const RegisterCompany = ({ userData }) => {
+    const [user] = useAuthState(auth);
+    const [companyData, setCompanyData] = useState({
         title: '',
         website: '',
-        address: ''
-    })
+        address: '',
+        city: '',
+        state: '',
+        pincode: '',
+        email: '',
+        landline: '',
+        phoneNo: '',
+    });
+
+    const [progress, setProgress] = useState(false);
+    const [error, setError] = useState(null);
+    const history = useHistory();
+
+    useEffect(() => {
+        if (userData?.companyData) {
+            history.push(`/user/dashboard/${userData.companyData.title}`)
+        }
+    }, [userData])
+
+    const handleClick = (e) => {
+        e.preventDefault();
+        if (
+            companyData.title.length > 0 &&
+            companyData.address.length > 0 &&
+            companyData.city.length > 0 &&
+            companyData.state.length > 0 &&
+            companyData.pincode.length > 0 &&
+            companyData.email.length > 0 &&
+            companyData.phoneNo.length > 0
+        ) {
+            register();
+        } else {
+            setError('Field values missing')
+        }
+    }
+
+
+
+    const register = () => {
+        setProgress(true);
+        users.doc(user.email).set({ companyData }, { merge: true })
+            .then(() => {
+                setProgress(false);
+            })
+    }
+
     return (
         <Container>
             <h1>Register Your Company</h1>
+            <h2>Enter Company Details</h2>
             <Form>
-                <InputField data={data} setData={setData} value={data.title} id={'title'} label="Compnany Title" icon={<TitleIcon />} />
-                <InputField data={data} setData={setData} value={data.website} id={'website'} label="Compnany Website" icon={<LanguageIcon />} />
-                <InputField data={data} setData={setData} value={data.website} id={'website'} label="Compnany Address" icon={<LocationOnIcon />} />
-                <InputField data={data} setData={setData} value={data.website} id={'website'} label="Compnany City" icon={<LocationOnIcon />} />
-                <InputField data={data} setData={setData} value={data.website} id={'website'} label="Compnany State" icon={<LocationOnIcon />} />
-                <InputField data={data} setData={setData} value={data.website} id={'website'} label="Compnany Pincode" icon={<PinDropIcon />} />
-                <InputField data={data} setData={setData} value={data.website} id={'website'} label="Compnany Mail" icon={<MailIcon />} />
-                <InputField data={data} setData={setData} value={data.website} id={'website'} label="Compnany Landline" icon={<PhoneIcon />} />
-                <InputField data={data} setData={setData} value={data.website} id={'website'} label="Compnany Phone No." icon={<PhoneAndroidIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.title} id={'title'} label="Title" icon={<TitleIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.website} id={'website'} label="Website" icon={<LanguageIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.address} id={'address'} label="Address" icon={<LocationOnIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.city} id={'city'} label="City" icon={<LocationOnIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.state} id={'state'} label="State" icon={<AccountBalanceIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.pincode} id={'pincode'} label="Pincode" icon={<PinDropIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.email} id={'email'} label="E-Mail" icon={<MailIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.landline} id={'landline'} label="Landline" icon={<PhoneIcon />} />
+                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.phoneNo} id={'phoneNo'} label="Phone No." icon={<PhoneAndroidIcon />} />
+                <button onClick={handleClick} type="submit" hidden>Register</button>
             </Form>
-            <Button startIcon={<CircularProgress size={16} color="white" />} type="submit" variant='contained' color="primary"> Register</Button>
+            {error && <Error message={error} />}
+            <Button onClick={handleClick} startIcon={progress && <CircularProgress size={16} color="white" />} type="submit" variant='contained' color="primary"> Register</Button>
         </Container>
     )
 }
@@ -47,18 +99,23 @@ const Container = styled.div`
         background:#B1A7B2;
         border-top-right-radius:15px;
     }
+    >h2{
+        margin: auto;
+        text-decoration: underline;
+    }
     >button{
         align-self:center;
         margin-top:20px;
     }
 `;
 const Form = styled.form`
-    margin-top:20px;
     width:100%;
-    /* max-width:500px; */
+    max-width:600px;
+    max-height:400px;
     /* flex:1; */
     height:500px;
     margin:auto;
+    margin-top:50px;
     padding:5px;
     display: flex;
     flex-wrap:wrap;

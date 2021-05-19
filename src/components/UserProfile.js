@@ -3,9 +3,10 @@ import React from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useHistory } from 'react-router';
 import styled from 'styled-components'
-import { auth, db } from '../utils/firebase';
+import { auth, users } from '../utils/firebase';
 import EditBox from './EditBox';
 import firebase from 'firebase'
+import AddProfileImage from './AddProfileImage';
 
 const UserProfile = ({ userData }) => {
     const [user] = useAuthState(auth);
@@ -17,7 +18,7 @@ const UserProfile = ({ userData }) => {
         firebase.auth().currentUser.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(userData.email, password))
         user.delete().then(function () {
             auth.currentUser && auth.signOut()
-            db.collection('users').doc(userData.email).delete().then(() => {
+            users.doc(userData.email).delete().then(() => {
                 history.push('/');
             })
         }).catch(function (error) {
@@ -29,11 +30,12 @@ const UserProfile = ({ userData }) => {
         <Container>
             <h1>Profile</h1>
             <EditBoxs>
-                <EditBox userData={userData} userId={userData.email} type={'email'} name={'email'} title={'Email'} value={userData.email} key={'email'} id={'email'} immutable />
-                <EditBox userData={userData} userId={userData.email} type={'text'} name={'name'} title={'Name'} value={userData.name} key={'name'} id={'name'} />
-                <EditBox userData={userData} userId={userData.email} type={'number'} name={'phone'} title={'Phone Number'} value={userData.phoneNo} key={'phoneNo'} id={'phoneNo'} />
-                <EditBox userData={userData} userId={userData.email} type={'text'} name={'company'} title={'Company'} value={userData.companyName} key={'companyName'} id={'companyName'} />
-                <DeleteUser onClick={deleteUser} >Delete Account</DeleteUser>
+                <AddProfileImage userData={userData} />
+                <EditBox key={'email'} userData={userData} userId={userData.email} type={'email'} name={'email'} title={'Email'} value={userData.email} id={'email'} immutable />
+                <EditBox key={'name'} userData={userData} userId={userData.email} type={'text'} name={'name'} title={'Name'} value={userData.name} id={'name'} />
+                <EditBox key={'phoneNo'} userData={userData} userId={userData.email} type={'number'} name={'phone'} title={'Phone Number'} value={userData.phoneNo} id={'phoneNo'} />
+                <EditBox key={'companyName'} userData={userData} userId={userData.email} type={'text'} name={'company'} title={'Company'} value={userData.companyName} id={'companyName'} />
+                <DeleteUser onClick={deleteUser}>Delete Account</DeleteUser>
             </EditBoxs>
         </Container>
     )

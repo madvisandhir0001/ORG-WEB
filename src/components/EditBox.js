@@ -5,12 +5,12 @@ import EditIcon from '@material-ui/icons/Edit';
 import DoneIcon from '@material-ui/icons/Done';
 import ClearIcon from '@material-ui/icons/Clear';
 import firebase from 'firebase'
-import { auth, db } from '../utils/firebase';
+import { auth, users } from '../utils/firebase';
 import Error from './Error';
 import Success from './Success';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
-const EditBox = ({ userData, userId, id, type, name, title, value, key, immutable }) => {
+const EditBox = ({ userData, userId, id, type, name, title, value, immutable }) => {
 
     const [user, loading, error2] = useAuthState(auth);
     const [disabled, setDisabled] = useState(true);
@@ -24,7 +24,7 @@ const EditBox = ({ userData, userId, id, type, name, title, value, key, immutabl
         if (input.length > 0) {
             setProgress(true);
             const handlePhoneVefier = id === "phoneNo" ? false : true
-            db.collection('users').doc(userId).set({ [id]: input, phoneNoVerified: handlePhoneVefier }, { merge: true }).then(() => {
+            users.doc(userId).set({ [id]: input, phoneNoVerified: handlePhoneVefier }, { merge: true }).then(() => {
                 setSuccess(`${title} changed to ${input}`);
                 setDisabled(true);
                 setProgress(false);
@@ -50,7 +50,7 @@ const EditBox = ({ userData, userId, id, type, name, title, value, key, immutabl
                 setProgress2(true)
                 const password = prompt("Enter Password ", '');
                 auth.signInWithEmailAndPassword(email, password).then(() => {
-                    db.collection('users').doc(email).set({ phoneNoVerified: true }, { merge: true })
+                    users.doc(email).set({ phoneNoVerified: true }, { merge: true })
                         .then(() => setProgress2(false))
                 })
             }).catch((err) => console.log(err))
@@ -61,7 +61,7 @@ const EditBox = ({ userData, userId, id, type, name, title, value, key, immutabl
         user.sendEmailVerification()
     }
     useEffect(() => {
-        user?.emailVerified && db.collection('users').doc(user.email).set({ emailVerified: true }, { merge: true })
+        user?.emailVerified && users.doc(user.email).set({ emailVerified: true }, { merge: true })
             .then(() => setProgress2(false))
     }, [user])
     return (
@@ -78,18 +78,23 @@ const EditBox = ({ userData, userId, id, type, name, title, value, key, immutabl
                 InputProps={{
                     endAdornment: (
                         !immutable && <InputAdornment position="end">
-                            <IconButton
-                                aria-label="toggle password visibility">
-                                {(value && !progress) ?
-                                    (disabled ?
-                                        <EditIcon onClick={() => setDisabled(false)} className='mui-icon' />
-                                        :
-                                        <DoneIcon style={{ color: 'green' }} onClick={handleChange} />
-                                    )
+                            {(value && !progress) ?
+                                (disabled ?
+                                    <IconButton onClick={() => setDisabled(false)} aria-label="toggle password visibility">
+                                        <EditIcon className='mui-icon' />
+                                    </IconButton>
                                     :
+
+                                    <IconButton onClick={handleChange} aria-label="toggle password visibility">
+                                        <DoneIcon style={{ color: 'green' }} />
+                                    </IconButton>
+                                )
+                                :
+                                <IconButton aria-label="toggle password visibility">
                                     <CircularProgress size={16} />
-                                }
-                            </IconButton>
+                                </IconButton>
+                            }
+
                         </InputAdornment>
                     )
                 }}

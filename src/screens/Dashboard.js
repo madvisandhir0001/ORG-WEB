@@ -7,12 +7,14 @@ import styled from 'styled-components'
 import Account from '../components/Account';
 import RegisterCompany from '../components/RegisterCompany';
 import UserProfile from '../components/UserProfile';
-import { auth, db } from '../utils/firebase';
+import CompanyCP from '../components/CompanyCP';
+import { auth, users } from '../utils/firebase';
 
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import PersonOutlinedIcon from '@material-ui/icons/PersonOutlined';
 import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
+import HomeIcon from '@material-ui/icons/Home';
 
 const Dashboard = () => {
     const [user, loading] = useAuthState(auth);
@@ -20,10 +22,10 @@ const Dashboard = () => {
     const history = useHistory();
     const location = useLocation();
     useEffect(() => { location?.pathname === '/user/dashboard' && history.push('/user/dashboard/profile') }, [])
+
     useEffect(() => {
         if (user) {
-            const ref = db.collection('users').doc(user.email || userData.email);
-            ref.get().then(res => setUserData(res.data()));
+            users.doc(user.email || userData.email).onSnapshot(snapshot => setUserData(snapshot.data()));
         }
     }, [user]);
 
@@ -32,6 +34,7 @@ const Dashboard = () => {
             history.push('/')
         }
     }, [user, loading])
+
     return (
         <Container>
             <Profile>
@@ -50,14 +53,22 @@ const Dashboard = () => {
                                 Profile
                             </Button>
                         </Path>
-                        <Path to='/user/dashboard/register company'>
+                        {!userData.companyData && <Path to='/user/dashboard/register company'>
                             <Button
                                 variant="text"
                                 color="inherit"
                                 startIcon={<BusinessOutlinedIcon />}
                                 endIcon={location?.pathname === '/user/dashboard/register company' && <ArrowRightAltIcon />}>
                                 Register Company</Button>
-                        </Path>
+                        </Path>}
+                        {userData.companyData && <Path to={`/user/dashboard/company/${userData.companyData.title}`}>
+                            <Button
+                                variant="text"
+                                color="inherit"
+                                startIcon={<BusinessOutlinedIcon />}
+                                endIcon={location?.pathname === `/user/dashboard/company/${userData.companyData.title}` && <ArrowRightAltIcon />}>
+                                {userData.companyData.title}</Button>
+                        </Path>}
                         <Path to='/user/dashboard/account'>
                             <Button
                                 variant="text"
@@ -65,6 +76,14 @@ const Dashboard = () => {
                                 startIcon={<DashboardOutlinedIcon />}
                                 endIcon={location?.pathname === '/user/dashboard/account' && <ArrowRightAltIcon />}>
                                 Account
+                            </Button>
+                        </Path>
+                        <Path to='/'>
+                            <Button
+                                variant="text"
+                                color="inherit"
+                                startIcon={<HomeIcon />}>
+                                Home
                             </Button>
                         </Path>
                     </Nav>
@@ -75,7 +94,8 @@ const Dashboard = () => {
                 </Sidebar>
                 <Content>
                     <Route path="/user/dashboard/profile"><UserProfile userData={userData} /></Route>
-                    <Route path="/user/dashboard/register company"><RegisterCompany /></Route>
+                    <Route path="/user/dashboard/register company">{!userData.companyData && <RegisterCompany userData={userData} />}</Route>
+                    <Route path="/user/dashboard/company">{userData.companyData && <CompanyCP userData={userData} />}</Route>
                     <Route path="/user/dashboard/account"><Account /></Route>
                 </Content>
             </Profile>
@@ -124,6 +144,8 @@ const Header = styled.div`
 `;
 const Nav = styled.div`
     margin-top:100px;
+    width: 100%;
+    max-width:fit-content;
 `;
 const Path = styled(Link)`
     display: flex;

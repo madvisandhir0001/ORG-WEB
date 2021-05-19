@@ -1,7 +1,7 @@
 import { Button, CircularProgress, IconButton, InputAdornment } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { auth, db } from "../utils/firebase";
+import { auth, users } from "../utils/firebase";
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useHistory } from "react-router";
@@ -30,7 +30,7 @@ function RegisterScreen() {
 
     useEffect(() => {
         if (authUser) {
-            const ref = email && db.collection('users').doc(email)
+            const ref = email && users.doc(email)
             ref && ref.get().then(res => {
                 if (!res.exists) {
                     setProgress(true);

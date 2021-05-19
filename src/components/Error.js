@@ -12,4 +12,5 @@ export default Error
 const Container = styled.p`
     color:red;
     font-size:16px;
+    margin:auto
 `;
