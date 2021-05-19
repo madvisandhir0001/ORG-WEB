@@ -1,50 +1,32 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../utils/firebase';
-import { Avatar, Button } from '@material-ui/core';
-import { useHistory } from 'react-router';
-import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import Slideshow from '../components/Slideshow';
+import Categories from '../components/Categories';
+import PinnedProfiles from '../components/PinnedProfiles';
+import BriefProfile from '../components/BriefProfile';
+import AboutSite from '../components/AboutSite';
+import Team from '../components/Team';
+import Footer from '../components/Footer';
+import Header from '../components/Header';
 
 const HomeScreen = () => {
-    const [user] = useAuthState(auth);
-    const history = useHistory();
+
     return (
         <Container>
-            <Header>
-                <Brand>
-                    <img src="https://www.dynadot.com/domain/logo/org-logo1437113194.png" />
-                    <h1>ORG LDH</h1>
-                </Brand>
-                <Nav>
-                    <h3>Products</h3>
-                    <h3>Templates</h3>
-                    <h3>Pricing</h3>
-                    <h3>Customers</h3>
-                </Nav>
-                {!user ?
-                    <Auth>
-                        <Button onClick={() => history.push('/user/login')} variant="outlined" color="primary">Sign In</Button>
-                    </Auth>
-                    :
-                    <User>
-                        <Avatar onClick={() => auth.signOut()} src={user?.photoURL} />
-                    </User>
-                }
-            </Header>
+            <Header />
             <Body>
                 <Left>
-                    <div>
-                        <h1>description</h1>
-                        <Button onClick={() => history.push('/user/register')} variant="contained" color="primary" endIcon={<ArrowForwardIcon />}>Get Started</Button>
-                    </div>
+                    <Slideshow />
                 </Left>
                 <Right>
-                    <Circle></Circle>
-                    <img src={'https://firebasestorage.googleapis.com/v0/b/org-ldh.appspot.com/o/assests%2FhomeScreen__rightLogo.png?alt=media&token=e6b2f0e2-346f-4f22-b052-999115dd350a'} />
+                    <Categories />
+                    <PinnedProfiles />
                 </Right>
             </Body>
-            <Footer></Footer>
+            <BriefProfile />
+            <AboutSite />
+            <Team />
+            <Footer />
         </Container>
     )
 }
@@ -52,62 +34,31 @@ const HomeScreen = () => {
 export default HomeScreen
 
 const Container = styled.div`
-    
-    ::-webkit-scrollbar{
-        display: none;
-    }
     -ms-overfle-style:none;
     scrollbar-width:none;
+    background-color:whitesmoke;
 `;
-const Header = styled.div`
-    display: flex;
-    justify-content:space-between;
-    padding:10px;
-    align-items: center;
-`;
-const Brand = styled.div`
-    display: flex;
-    align-items: center;
-    >img{
-        height:40px;
-        object-fit:contain;
-    }
-    >h1{
-        font-size:20px;
-        margin-left:20px;
-    }
-`;
-const Nav = styled.div`
-    flex:1;
-    display: flex;
-    justify-content:space-evenly;
-    max-width:500px;
-    >h3{
-        color:gray;
-        font-size:14px;
-        font-weight:400;
-    }
-`;
-const User = styled.div``;
-const Auth = styled.div``;
 const Body = styled.div`
     display: flex;
-    height:80vh;
+    width:98vw;
+    position:relative;
     overflow:hidden;
+    margin-top:20px;
+    margin:auto;
+    justify-content:space-between;
 `;
 const Left = styled.div`
-    flex:.5;
-    height:100%;
+    flex:.65;
+    height:90vh;
     width:100%;
-    display:grid;
-    place-items:center;
+    padding:70px;
+    transform:scale(1.2);
 `;
 const Right = styled.div`
-    flex:.5;
+    flex:.3;
     height:100%;
     width:100%;
-    display:grid;
-    place-items:center;
+    overflow:hidden !important;
     >img{
         height:450px;
         object-fit:contain;
@@ -116,14 +67,3 @@ const Right = styled.div`
 
     }
 `;
-const Circle = styled.div`
-    background-color:#FF6260;
-    height:1000px;
-    width:1000px;
-    border-radius:50%;
-    z-index:-1;
-    position:absolute;
-    right:-15%;
-    bottom:-20%;
-`;
-const Footer = styled.div``;

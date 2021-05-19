@@ -34,7 +34,7 @@ function RegisterScreen() {
             ref && ref.get().then(res => {
                 if (!res.exists) {
                     setProgress(true);
-                    ref.set({ name, email, phoneNo, companyName, emailVerified: false, phoneNoVerified: false }).then(() => history.replace('/')).then(() => setProgress(true))
+                    ref.set({ name, email, phoneNo, companyName }, { merge: true }).then(() => history.replace('/')).then(() => setProgress(true))
                 }
             })
         }
@@ -128,6 +128,7 @@ function RegisterScreen() {
                                 </InputAdornment>
                             )
                         }}
+
                     />
                     <InputField
                         value={confirmPassword}
