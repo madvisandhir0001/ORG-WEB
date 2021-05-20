@@ -8,17 +8,31 @@ import AboutSite from '../components/AboutSite';
 import Team from '../components/Team';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import AlertBox from '../components/AlertBox';
+import { useHistory } from 'react-router';
+import { useSelector } from 'react-redux';
+import { selectUserData } from '../features/appSlice';
+
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+AOS.init();
 
 const HomeScreen = () => {
+    const history = useHistory();
+    const userData = useSelector(selectUserData);
 
     return (
         <Container>
-            <Header />
+            {userData &&
+                (!userData.emailVerified &&
+                    <AlertBox type="info" message="" messageStrong="Complete your Profile" action={() => history.push('/user/dashboard/profile')} />
+                )
+            }
             <Body>
-                <Left>
+                <Left >
                     <Slideshow />
                 </Left>
-                <Right>
+                <Right data-aos="fade-up" data-aos-duration="1000">
                     <Categories />
                     <PinnedProfiles />
                 </Right>
@@ -37,6 +51,9 @@ const Container = styled.div`
     -ms-overfle-style:none;
     scrollbar-width:none;
     background-color:whitesmoke;
+    height:100vh;
+    z-index:150 !important;
+    overflow: scroll;
 `;
 const Body = styled.div`
     display: flex;

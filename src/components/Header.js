@@ -1,20 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react'
-import styled from 'styled-components';
-
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, users } from '../utils/firebase';
+import { auth } from '../utils/firebase';
 import { Avatar, Button } from '@material-ui/core';
-import { useHistory } from 'react-router';
-// import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import { useHistory, useLocation } from 'react-router';
 import { Link as ATag } from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { useSelector } from 'react-redux';
+import { selectUserData } from '../features/appSlice';
+import styled from 'styled-components';
+
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+AOS.init();
 
 const Header = () => {
     const [user] = useAuthState(auth);
     const history = useHistory();
-    const [userData, setUserData] = useState([]);
+    const userData = useSelector(selectUserData);
     const [showSettings, setShowSettings] = useState(false);
     const settingsRef = useRef();
+    const location = useLocation();
+    const pathName = location.pathname;
+
     const useOutsideAlerter = ref => {
         useEffect(() => {
             const handleClickOutside = event => {
@@ -26,27 +33,20 @@ const Header = () => {
             return () => document.removeEventListener("mousedown", handleClickOutside)
         }, [ref]);
     }
-
-    useEffect(() => {
-        if (user) {
-            users.doc(user.email).onSnapshot(snapshot => setUserData(snapshot.data()));
-        }
-    }, [user]);
-
     useOutsideAlerter(settingsRef);
 
     return (
-        <Container>
-            <Brand>
+        <Container >
+            <Brand onClick={() => history.push('/')}>
                 <img src="" alt="logo" />
                 <h1>Project Title</h1>
             </Brand>
             <Nav className="no-select">
-                <Link to="/">Home</Link>
-                <Link to="/categories">Categories</Link>
-                <Link to="/about">About Us</Link>
-                <Link to="/contact">Chat</Link>
-                {user && <Link to="/user/dashboard/profile">Profile</Link>}
+                <Link to="/" className={pathName === '/' && "header-nav-active"}>Home</Link>
+                <Link to="/categories" className={pathName === '/categories' && "header-nav-active"}>Categories</Link>
+                <Link to="/about" className={pathName === '/about' && "header-nav-active"}>About Us</Link>
+                <Link to="/contact" className={pathName === '/contact' && "header-nav-active"}>Chat</Link>
+                {user && <Link to="/user/dashboard/profile" className={pathName === '/user/dashboard/profile' && "header-nav-active"}>Profile</Link>}
             </Nav>
             {!user ?
                 <Auth>
@@ -79,12 +79,22 @@ export default Header
 const Container = styled.div`
     display: flex;
     justify-content:space-between;
-    padding:10px;
+    padding:5px 10px;
     align-items: center;
+    background-color:white;
+    border-bottom: 1px solid lightgray;
+    z-index:150000 !important;
+
+    /* ::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;  
+    scrollbar-width: none; */
 `;
 const Brand = styled.div`
     display: flex;
     align-items: center;
+    cursor:pointer;
     >img{
         height:40px;
         object-fit:contain;
@@ -124,7 +134,7 @@ const Settings = styled.div`
     right:35px;
     top:46px;
     border-radius:10px;
-    z-index:100;
+    z-index:150000 !important;
     >p{
         padding:0;
         margin:0;

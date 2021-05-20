@@ -41,6 +41,7 @@ const Info = styled.div`
     flex-direction:column;
     padding:30px;
     padding-top:85px;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
     >h1{
 
     }

@@ -1,4 +1,8 @@
 .app {
+  background-color: whitesmoke;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 .gradient-btm-top {
@@ -15,4 +19,9 @@
 }
 .Mui-disabled {
   color: black !important;
+}
+.header-nav-active {
+  transform: scale(1.07);
+  color: blue !important;
+  font-weight: bold !important  ;
 }

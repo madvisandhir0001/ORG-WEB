@@ -4,21 +4,18 @@ import { Button, CircularProgress, IconButton, InputAdornment, TextField } from 
 import EditIcon from '@material-ui/icons/Edit';
 import DoneIcon from '@material-ui/icons/Done';
 import ClearIcon from '@material-ui/icons/Clear';
-import firebase from 'firebase'
 import { auth, users } from '../utils/firebase';
-import Error from './Error';
-import Success from './Success';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import VerifyPhoneModal from './VerifyPhoneModal';
 
-const EditBox = ({ userData, userId, id, type, name, title, value, immutable }) => {
+const EditBox = ({ userData, userId, id, type, name, title, value, immutable, setError, setSuccess, setPrimary }) => {
 
     const [user, loading, error2] = useAuthState(auth);
     const [disabled, setDisabled] = useState(true);
     const [progress, setProgress] = useState(false);
     const [progress2, setProgress2] = useState(false);
+    const [open, setOpen] = useState(false);
     const [input, setInput] = useState('');
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
 
     const handleChange = () => {
         if (input.length > 0) {
@@ -34,31 +31,25 @@ const EditBox = ({ userData, userId, id, type, name, title, value, immutable }) 
         }
     }
 
+    useEffect(() => {
+        if (auth.currentUser) {
+            auth.currentUser.emailVerified && users.doc(user.email).set({ emailVerified: true }, { merge: true })
+        }
+    }, [auth])
+
     const handleCancel = () => {
         setInput('');
         setDisabled(true);
     }
 
-    const verifyPhoneNumber = () => {
-        const recaptcha = new firebase.auth.RecaptchaVerifier('recaptcha-container');
-        const phoneNumber = `+91${userData.phoneNo}`;
-        const email = userData.email;
-        auth.signInWithPhoneNumber(phoneNumber, recaptcha).then(e => {
-            let code = prompt("Enter OTP ", '');
-            if (code == null) return;
-            e.confirm(code).then((user) => {
-                setProgress2(true)
-                const password = prompt("Enter Password ", '');
-                auth.signInWithEmailAndPassword(email, password).then(() => {
-                    users.doc(email).set({ phoneNoVerified: true }, { merge: true })
-                        .then(() => setProgress2(false))
-                })
-            }).catch((err) => console.log(err))
-        }).catch((err) => console.log(err))
-    }
+
 
     const verifyEmail = () => {
-        user.sendEmailVerification()
+        user.sendEmailVerification();
+        setSuccess(`Verification Link sent to ${userData.email}`);
+        setTimeout(function () {
+            setPrimary(`Click here when you done with verification`);
+        }, 8000);
     }
     useEffect(() => {
         user?.emailVerified && users.doc(user.email).set({ emailVerified: true }, { merge: true })
@@ -66,7 +57,6 @@ const EditBox = ({ userData, userId, id, type, name, title, value, immutable }) 
     }, [user])
     return (
         <Container>
-            <Recaptcha id="recaptcha-container"></Recaptcha>
             <h3>{title}</h3>
             <TextField
                 // variant="Member"
@@ -77,7 +67,7 @@ const EditBox = ({ userData, userId, id, type, name, title, value, immutable }) 
                 name={name}
                 InputProps={{
                     endAdornment: (
-                        !immutable && <InputAdornment position="end">
+                        (!immutable && id !== 'companyName') && <InputAdornment position="end">
                             {(value && !progress) ?
                                 (disabled ?
                                     <IconButton onClick={() => setDisabled(false)} aria-label="toggle password visibility">
@@ -91,7 +81,7 @@ const EditBox = ({ userData, userId, id, type, name, title, value, immutable }) 
                                 )
                                 :
                                 <IconButton aria-label="toggle password visibility">
-                                    <CircularProgress size={16} />
+                                    < CircularProgress size={16} />
                                 </IconButton>
                             }
 
@@ -101,9 +91,9 @@ const EditBox = ({ userData, userId, id, type, name, title, value, immutable }) 
             />
             {!disabled && <CancelIcon onClick={handleCancel} />}
             {!userData.emailVerified && id === 'email' && <Verify onClick={verifyEmail} color={'primary'}>Verify</Verify>}
-            {!userData.phoneNoVerified && id === 'phoneNo' && <Verify id='sign-in-button' onClick={verifyPhoneNumber} color={'primary'}>Verify</Verify>}
+            {!userData.phoneNoVerified && id === 'phoneNo' && <Verify id='sign-in-button' onClick={() => setOpen(true)} color={'primary'}>Verify</Verify>}
             {progress2 && <CircularProgress />}
-
+            {open && <VerifyPhoneModal open={open} setOpen={setOpen} userData={userData} />}
             {/* {error && <Error message={error} />}
             {success && <Success message={success} />} */}
         </Container>
@@ -112,10 +102,7 @@ const EditBox = ({ userData, userId, id, type, name, title, value, immutable }) 
 
 export default EditBox
 
-const Recaptcha = styled.div`
-    position:absolute;
-    top:-150px;
-`;
+
 // const Container = styled.div``;
 const Container = styled.div`
     display: flex;

@@ -11,13 +11,17 @@ import PinDropIcon from '@material-ui/icons/PinDrop';
 import PhoneAndroidIcon from '@material-ui/icons/PhoneAndroid';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import { Button, CircularProgress } from '@material-ui/core';
-import { auth, users } from '../utils/firebase';
+import { auth, companies, users } from '../utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import Error from './Error';
 import { useHistory } from 'react-router';
+import AddCompanyImage from './AddCompanyImage';
+import { useSelector } from 'react-redux';
+import { selectCompanyData } from '../features/appSlice';
 
 const RegisterCompany = ({ userData }) => {
     const [user] = useAuthState(auth);
+    const existCompanyData = useSelector(selectCompanyData);
     const [companyData, setCompanyData] = useState({
         title: '',
         website: '',
@@ -35,10 +39,10 @@ const RegisterCompany = ({ userData }) => {
     const history = useHistory();
 
     useEffect(() => {
-        if (userData?.companyData) {
-            history.push(`/user/dashboard/${userData.companyData.title}`)
+        if (existCompanyData) {
+            history.push(`/user/dashboard/company/${companyData.title}`)
         }
-    }, [userData])
+    }, [existCompanyData])
 
     const handleClick = (e) => {
         e.preventDefault();
@@ -57,34 +61,45 @@ const RegisterCompany = ({ userData }) => {
         }
     }
 
-
-
     const register = () => {
         setProgress(true);
-        users.doc(user.email).set({ companyData }, { merge: true })
+        companies.doc(user.email).set(companyData, { merge: true })
             .then(() => {
-                setProgress(false);
+                history.replace(`/user/dashboard/company/${companyData.title}`)
             })
     }
 
     return (
         <Container>
-            <h1>Register Your Company</h1>
-            <h2>Enter Company Details</h2>
-            <Form>
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.title} id={'title'} label="Title" icon={<TitleIcon />} />
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.website} id={'website'} label="Website" icon={<LanguageIcon />} />
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.address} id={'address'} label="Address" icon={<LocationOnIcon />} />
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.city} id={'city'} label="City" icon={<LocationOnIcon />} />
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.state} id={'state'} label="State" icon={<AccountBalanceIcon />} />
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.pincode} id={'pincode'} label="Pincode" icon={<PinDropIcon />} />
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.email} id={'email'} label="E-Mail" icon={<MailIcon />} />
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.landline} id={'landline'} label="Landline" icon={<PhoneIcon />} />
-                <InputField companyData={companyData} setCompanyData={setCompanyData} value={companyData.phoneNo} id={'phoneNo'} label="Phone No." icon={<PhoneAndroidIcon />} />
-                <button onClick={handleClick} type="submit" hidden>Register</button>
-            </Form>
-            {error && <Error message={error} />}
-            <Button onClick={handleClick} startIcon={progress && <CircularProgress size={16} color="white" />} type="submit" variant='contained' color="primary"> Register</Button>
+            {userData.emailVerified && userData.phoneNoVerified ?
+                <>
+                    <h1>Register Your Company</h1>
+                    <h2>Enter Company Details</h2>
+                    <Form>
+                        {/* <AddCompanyImage userData={userData} /> */}
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.title} id={'title'} label="Title" icon={<TitleIcon />} />
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.website} id={'website'} label="Website" icon={<LanguageIcon />} optional />
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.address} id={'address'} label="Address" icon={<LocationOnIcon />} />
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.city} id={'city'} label="City" icon={<LocationOnIcon />} />
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.state} id={'state'} label="State" icon={<AccountBalanceIcon />} />
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.pincode} id={'pincode'} label="Pincode" icon={<PinDropIcon />} />
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.email} id={'email'} label="E-Mail" icon={<MailIcon />} />
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.landline} id={'landline'} label="Landline" icon={<PhoneIcon />} optional />
+                        <InputField Data={companyData} setData={setCompanyData} value={companyData.phoneNo} id={'phoneNo'} label="Phone No." icon={<PhoneAndroidIcon />} />
+                        <button onClick={handleClick} type="submit" hidden>Register</button>
+                    </Form>
+                    {error && <Error message={error} />}
+                    <Button onClick={handleClick} startIcon={progress && <CircularProgress size={16} color="white" />} type="submit" variant='contained' color="primary"> Register</Button>
+                </>
+                :
+                <VerifyFirst>
+                    <h1>Register Your Company</h1>
+                    <h3>
+                        You need to verify Email and Phone Number to Register Your Company
+                        <Button onClick={() => history.push('/user/dashboard/profile')}>Verify Now</Button>
+                    </h3>
+                </VerifyFirst>
+            }
         </Container>
     )
 }
@@ -98,6 +113,10 @@ const Container = styled.div`
     >h1{
         background:#B1A7B2;
         border-top-right-radius:15px;
+        border-top-right-radius:15px;
+        padding:5px 10px;
+        background: rgb(137,196,175);
+        background: linear-gradient(90deg, rgba(137,196,175,1) 0%, rgba(137,166,196,1) 100%);
     }
     >h2{
         margin: auto;
@@ -143,4 +162,20 @@ const Form = styled.form`
     }
     
 `;
-
+const VerifyFirst = styled.div`
+    >h1{
+        background:#B1A7B2;
+        border-top-right-radius:15px;
+    }
+    >h3{
+        font-size:20px;
+        font-weight:400;
+        width: 100%;
+        margin: 10px auto;
+        max-width: 350px;
+        text-align: justify;
+        color:#B33A3A;
+    >button{
+        align-items: center;
+    } 
+}`;

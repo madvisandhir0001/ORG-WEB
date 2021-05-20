@@ -4,6 +4,10 @@ import styled from 'styled-components';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from 'react-responsive-carousel';
 
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+AOS.init();
+
 const Slideshow = () => {
     const [data, setData] = useState([])
     const history = useHistory();
@@ -25,10 +29,10 @@ const Slideshow = () => {
     }, []);
 
     return (
-        <Container>
+        <Container data-aos="fade-up" data-aos-duration="1000">
             <Carousel interval={5000} infiniteLoop autoPlay showIndicators={false} showStatus={false} showThumbs={false}>
                 {data && data.map((slide, index) =>
-                    <div onClick={() => history.push('/')}>
+                    <div key={slide.companyName, index} onClick={() => history.push('/')}>
                         <img src={slide.img} />
                         <div className="legend">
                             <h1>{slide.companyName}</h1>
@@ -44,7 +48,5 @@ const Slideshow = () => {
 export default Slideshow
 
 const Container = styled.div`
-    /* border-radius:20px; */
     margin:10px;
-    /* border:1px solid gray; */
 `;

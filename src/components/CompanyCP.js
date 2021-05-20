@@ -1,17 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { selectCompanyData } from '../features/appSlice';
 import CompanyAddProducts from './CompanyAddProducts';
 import CompanyInfo from './CompanyInfo'
 import CompanyProducts from './CompanyProducts';
 
-const CompanyCP = ({ userData }) => {
-    const companyData = userData.companyData;
+const CompanyCP = () => {
+    const companyData = useSelector(selectCompanyData);
+
+    const [show, setShow] = useState(-1);
+    const toggle = (i) => (show === i) ? setShow(-1) : setShow(i);
+
     return (
         <Container>
             <h1>{companyData.title.toUpperCase()}</h1>
-            <CompanyInfo companyData={companyData} />
-            <CompanyProducts />
-            <CompanyAddProducts />
+            <CompanyInfo companyData={companyData} show={show} toggle={() => toggle(0)} />
+            <CompanyProducts companyData={companyData} show={show} toggle={() => toggle(1)} />
+            <CompanyAddProducts companyData={companyData} show={show} toggleFn={toggle} toggle={() => toggle(2)} />
         </Container>
     )
 }
@@ -22,9 +28,20 @@ const Container = styled.div`
     width:100%;
     display: flex;
     flex-direction:column;
+    overflow-y: scroll;
+    overflow-x:hidden;
+    height: 100%;
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;  
+    scrollbar-width: none;
     >h1{
         background:#B1A7B2;
         border-top-right-radius:15px;
+        padding:5px 10px;
+        background: rgb(137,196,175);
+        background: linear-gradient(90deg, rgba(137,196,175,1) 0%, rgba(137,166,196,1) 100%);
     }
     >h2{
         margin: auto;
