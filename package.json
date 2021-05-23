@@ -9,6 +9,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "animate.css": "^4.1.1",
     "aos": "^3.0.0-beta.6",
     "better-react-spinkit": "^2.0.4",
     "firebase": "^8.6.1",

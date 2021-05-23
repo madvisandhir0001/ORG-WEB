@@ -2,7 +2,8 @@ import React from 'react'
 import { IconButton, InputAdornment, TextField } from '@material-ui/core'
 import styled from 'styled-components'
 
-const InputField = ({ label, value, id, icon, Data, setData, error, helperText, optional }) => {
+const InputField = ({ label, value, id, icon, Data, setData, error, helperText, optional, color }) => {
+
     return (
         <Input
             type='text'
@@ -31,4 +32,5 @@ export default InputField
 
 const Input = styled(TextField)`
     margin-bottom: 20px !important;
+    }
 `;

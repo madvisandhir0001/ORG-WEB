@@ -21,12 +21,13 @@ const UserProfile = ({ userData }) => {
 
     const deleteUser = () => {
         var user = firebase.auth().currentUser;
+        const email = user.email
         const password = prompt("Enter Password ", '');
         firebase.auth().currentUser.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(userData.email, password))
         user.delete().then(function () {
             auth.currentUser && auth.signOut()
-            users.doc(userData.email).delete().then(() => {
-                history.push('/');
+            users.doc(email).delete().then(() => {
+                history.replace('/');
             })
         }).catch(function (error) {
             console.log(error)
@@ -116,7 +117,9 @@ const UserProfile = ({ userData }) => {
 export default UserProfile
 
 const Container = styled.div`
+/* overflow: scroll; */
     >h1{
+        border-top-right-radius:15px;
         background:#B1A7B2;
         padding:5px 10px;
         background: rgb(137,196,175);
@@ -124,9 +127,12 @@ const Container = styled.div`
     }
 `;
 const Alerts = styled.div`
-    width: 500px;
+    width: 100%;
+    max-width: 500px;
     margin:10px auto;
-    
+    ${() => window.innerWidth < 960 && `
+        flex-direction:column;
+    `}
 `;
 const Buttons = styled.div`
     display: flex;

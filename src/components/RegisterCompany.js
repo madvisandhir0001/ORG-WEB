@@ -32,6 +32,7 @@ const RegisterCompany = ({ userData }) => {
         email: '',
         landline: '',
         phoneNo: '',
+        userEmail: user.email
     });
 
     const [progress, setProgress] = useState(false);
@@ -40,7 +41,7 @@ const RegisterCompany = ({ userData }) => {
 
     useEffect(() => {
         if (existCompanyData) {
-            history.push(`/user/dashboard/company/${companyData.title}`)
+            history.push(`/user/dashboard/company`)
         }
     }, [existCompanyData])
 
@@ -63,9 +64,9 @@ const RegisterCompany = ({ userData }) => {
 
     const register = () => {
         setProgress(true);
-        companies.doc(user.email).set(companyData, { merge: true })
+        companies.add(companyData, { merge: true })
             .then(() => {
-                history.replace(`/user/dashboard/company/${companyData.title}`)
+                history.replace(`/user/dashboard/company`);
             })
     }
 

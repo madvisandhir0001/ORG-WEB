@@ -16,7 +16,7 @@ function LoginScreen() {
     const [error3, setError3] = useState(null);
     const [success, setSuccess] = useState(null);
     const [progress, setProgress] = useState(false);
-    const [signInWithEmailAndPassword, user, loading, error,] = useSignInWithEmailAndPassword(auth, email, password);
+    const [signInWithEmailAndPassword, user, loading, error] = useSignInWithEmailAndPassword(auth, email, password);
     const [authUser, authLoading, authError] = useAuthState(auth);
 
     const history = useHistory();
@@ -31,8 +31,8 @@ function LoginScreen() {
         setError2(null);
         setError3(null)
         if (password.length > 0 && email.length > 0) {
-            setProgress(true)
-            signInWithEmailAndPassword(email, password)
+            setProgress(true);
+            signInWithEmailAndPassword(email, password);
         } else {
             !password && setError2({ type: '5', message: 'Password Required' })
             !email && setError2({ type: '2', message: 'Email Required' })

@@ -1,5 +1,5 @@
 import { Avatar, Button } from '@material-ui/core'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { Route, useHistory, useLocation } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -8,15 +8,15 @@ import Account from '../components/Account';
 import RegisterCompany from '../components/RegisterCompany';
 import UserProfile from '../components/UserProfile';
 import CompanyCP from '../components/CompanyCP';
-import { auth } from '../utils/firebase';
+import { auth, companies } from '../utils/firebase';
 
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import PersonOutlinedIcon from '@material-ui/icons/PersonOutlined';
 import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
-import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
+// import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
 import HomeIcon from '@material-ui/icons/Home';
 import { useSelector } from 'react-redux';
-import { selectCompanyData, selectUserData } from '../features/appSlice';
+import { selectUserData } from '../features/appSlice';
 import LoadingScreen from './LoadingScreen';
 
 import AOS from 'aos';
@@ -26,12 +26,21 @@ AOS.init();
 const Dashboard = () => {
     const [user, loading] = useAuthState(auth);
     const userData = useSelector(selectUserData);
-    const companyData = useSelector(selectCompanyData);
+    // const companyData = useSelector(selectCompanyData);
+    const [companyData, setCompanyData] = useState([]);
     const history = useHistory();
     const location = useLocation();
-    console.log(companyData)
+
+    console.log(companyData);
+
     // Redirect to first option in sidebar
     useEffect(() => { location?.pathname === '/user/dashboard' && history.push('/user/dashboard/profile') }, [])
+
+    useEffect(() => {
+        if (user) {
+            companies.where('userEmail', '==', user.email).onSnapshot(snapshot => setCompanyData(snapshot.docs.map(doc => doc.data())))
+        }
+    }, [user]);
 
     // Redirect to home page if user not authenticated
     useEffect(() => {
@@ -41,8 +50,10 @@ const Dashboard = () => {
     }, [user, loading])
 
     return (
-        (userData && companyData) ?
-            <Container data-aos="fade-down" data-aos-duration="1000">
+        (userData) ?
+            <Container
+            // data-aos="fade-down" data-aos-duration="1000"
+            >
                 <Profile>
                     <Sidebar>
                         <SidebarHeader>
@@ -59,7 +70,7 @@ const Dashboard = () => {
                                     Profile
                             </Button>
                             </Path>
-                            {!companyData && <Path to='/user/dashboard/register company'>
+                            {companyData.length === 0 && <Path to='/user/dashboard/register company'>
                                 <Button
                                     variant="text"
                                     color="inherit"
@@ -67,13 +78,14 @@ const Dashboard = () => {
                                     endIcon={location?.pathname === '/user/dashboard/register company' && <ArrowRightAltIcon />}>
                                     Register Company</Button>
                             </Path>}
-                            {companyData && <Path to={`/user/dashboard/company/${companyData?.title}`}>
+                            {companyData.length !== 0 && <Path to={`/user/dashboard/company`}>
                                 <Button
                                     variant="text"
                                     color="inherit"
                                     startIcon={<BusinessOutlinedIcon />}
-                                    endIcon={location?.pathname === `/user/dashboard/company/${companyData?.title}` && <ArrowRightAltIcon />}>
-                                    {companyData.title}</Button>
+                                    endIcon={location?.pathname === `/user/dashboard/company` && <ArrowRightAltIcon />}>
+                                    {companyData[0]?.title}
+                                </Button>
                             </Path>}
                             {/* <Path to='/user/dashboard/account'>
                                 <Button
@@ -99,9 +111,9 @@ const Dashboard = () => {
                         </IssueBox>
                     </Sidebar>
                     <Content>
-                        <Route path="/user/dashboard/profile"><UserProfile userData={userData} /></Route>
-                        <Route path="/user/dashboard/register company">{!companyData && <RegisterCompany userData={userData} />}</Route>
-                        <Route path="/user/dashboard/company">{companyData && <CompanyCP userData={userData} />}</Route>
+                        <Route path="/user/dashboard/profile"><UserProfile userData={userData} companyData={companyData} /></Route>
+                        <Route path="/user/dashboard/register company">{companyData.length === 0 && <RegisterCompany userData={userData} />}</Route>
+                        <Route path="/user/dashboard/company">{companyData.length !== 0 && <CompanyCP userData={userData} companyData={companyData && companyData[0]} />}</Route>
                         <Route path="/user/dashboard/account"><Account /></Route>
                     </Content>
                 </Profile>
@@ -116,16 +128,25 @@ export default Dashboard
 const Container = styled.div`
     display: grid;
     place-items:center;
-    height:100vh;
-    width:100vw;
+    min-height:100vh;
+    overflow-y: scroll;
+    /* width:100vw; */
     `;
 const Profile = styled.div`
     display: flex;
     background-color:white;
-    height:70vh;
-    width:70vw;
+    min-height:70vh;
+    min-width:70vw;
     border-radius:15px;
-    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2) ;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    ${() => window.innerWidth < 1250 && ` 
+        width:98vw;
+        min-height:90vh;
+    `}
+    ${() => window.innerWidth < 850 && ` 
+        min-height:100vh;
+        flex-direction: column;
+    `}
 `;
 const Sidebar = styled.div`
     background-color:#0D0D19;
@@ -139,6 +160,8 @@ const Sidebar = styled.div`
     flex-direction:column;
     align-items: center;
     position:relative;
+    background: rgb(0,0,0);
+    background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8211659663865546) 100%);
 `;
 const SidebarHeader = styled.div`
     display: flex;
@@ -154,6 +177,9 @@ const Nav = styled.div`
     margin-top:100px;
     width: 100%;
     max-width:fit-content;
+    ${() => window.innerWidth < 850 && ` 
+        margin-top:20px;
+    `}
 `;
 const Path = styled(Link)`
     display: flex;
@@ -192,6 +218,9 @@ const IssueBox = styled.div`
             opacity:.8 ;
         }
     }
+    ${() => window.innerWidth < 850 && ` 
+        display: none;
+    `}
 `;
 const ContentHeader = styled.div``;
 // const Container = styled.div``;

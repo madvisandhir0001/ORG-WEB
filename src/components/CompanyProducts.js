@@ -3,23 +3,34 @@ import styled from 'styled-components';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { IconButton } from '@material-ui/core';
-import { auth, companies } from '../utils/firebase';
+import { auth, products as productsRef } from '../utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import ProductCard from './ProductCard';
 
 const CompanyProducts = ({ toggle, show }) => {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState([])
+    const [companyProducts, setCompanyProducts] = useState([]);
     const [user] = useAuthState(auth);
 
     useEffect(() => {
-        const unsubscribe = companies.doc(user.email).collection('products').onSnapshot(snapshot => {
-            setProducts(snapshot.docs.map(product => ({ id: product.id, data: product.data() })))
-        })
+        productsRef.onSnapshot(snapshot => setProducts(snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }))));
 
-        return () => {
-            unsubscribe();
+    }, []);
+
+    console.log(products)
+    console.log(companyProducts)
+
+    useEffect(() => {
+        if (products) {
+            let arr = [];
+            products.map(product => {
+                if (product.data.email === user.email) {
+                    arr.push(product);
+                }
+                setCompanyProducts(arr)
+            })
         }
-    }, [user]);
+    }, [products]);
 
     return (
         <Container>
@@ -30,10 +41,20 @@ const CompanyProducts = ({ toggle, show }) => {
                 </IconButton>
             </div>
             {show === 1 &&
-                <Products>
-                    {products && products.map(({ id, data }) => <ProductCard data={data} id={id} key={id} />)}
-                </Products>
+
+                <>
+                    {companyProducts.length !== 0 ?
+                        <Products>
+                            {companyProducts.map(({ id, data }) => <ProductCard data={data} id={id} key={id} />)}
+                        </Products>
+                        :
+                        <NoProducts>
+                            <h4>No Products</h4>
+                        </NoProducts>}
+                </>
+
             }
+
         </Container>
     )
 }
@@ -52,6 +73,10 @@ border: 1px solid lightgray;
         padding:0 10px;
         background: rgb(137,166,196);
         background: linear-gradient(90deg,rgba(137,166,196,1) 0% ,rgba(137,166,196,.5) 100% );
+        cursor: pointer;
+        :hover{
+            opacity: 0.8;
+        }
     }
     >.header>h2{
         text-transform: capitalize;
@@ -60,4 +85,16 @@ border: 1px solid lightgray;
 const Products = styled.div`
     display: flex;
     flex-direction:column;
+    overflow-y: scroll;
+    height: 500px;
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;  
+    scrollbar-width: none;
+`;
+const NoProducts = styled.div`
+    padding:40px;
+    /* display: flex;
+    flex-direction:column; */
 `;

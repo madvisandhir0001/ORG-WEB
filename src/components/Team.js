@@ -45,7 +45,12 @@ const Container = styled.div`
 `;
 const Cards = styled.div`
     display: flex;
-    width:60vw;
     margin:auto;
+    width: 60vw;
+    ${() => window.innerWidth < 1000 && `
+        width:100vw;
+        flex-direction:column;
+        align-items: center;
+    `}
     /* justify-contsent: space-evenly; */
 `;

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Avatar } from '@material-ui/core'
 import styled from 'styled-components'
-import { users, users as usersRef } from '../utils/firebase'
+import { users as usersRef } from '../utils/firebase'
+import { useHistory } from 'react-router'
 
 const PinnedProfiles = () => {
     const [users, setUser] = useState([])
+    const history = useHistory();
     useEffect(() => {
         usersRef.limit(7).get().then(snapshot => {
             setUser(snapshot.docs.map(doc => doc.data()))
@@ -15,7 +17,7 @@ const PinnedProfiles = () => {
         <Container>
             <h1>Pinned Profiles</h1>
             {users && users.map(user =>
-                <User>
+                <User onClick={() => history.push(`/appuser/${user.email}`)}>
                     <Avatar style={{ width: '40px', height: '40px' }} src={user.profilePic} />
                     <h3>{user.name.charAt(0).toUpperCase() + user.name.slice(1)}</h3>
 
@@ -30,6 +32,7 @@ const Container = styled.div`
     margin:10px;
     background-color:white;
     border-radius:10px;
+    height:40vh;
     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
     >h1{
         color:#383B51;

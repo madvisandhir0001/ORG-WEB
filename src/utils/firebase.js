@@ -22,7 +22,8 @@ const storage = app.storage();
 const users = db.collection('users');
 const companies = db.collection('companies');
 const admin = db.collection('admin');
+const products = db.collection('products');
 
 const provider = new firebase.auth.GoogleAuthProvider();
 
-export { auth, provider, storage, users, companies, admin }
+export { auth, provider, products, storage, users, companies, admin }

@@ -6,21 +6,30 @@ import { auth, companies } from '../utils/firebase'
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useHistory } from 'react-router'
+import { setCompanyData } from '../features/appSlice'
+import { useDispatch } from 'react-redux'
 
 const CompanyInfo = ({ companyData, show, toggle }) => {
     const [user] = useAuthState(auth);
     const [progress, setProgress] = useState(false);
-    const history = useHistory()
+    const history = useHistory();
+    const dispatch = useDispatch()
+
     const removeCompany = () => {
-        setProgress(true);
-        companies.doc(user.email).delete()
-        companies.doc(user.email).collection('products').get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    doc.ref.delete();
-                });
-            }).then(() => history.replace('/user/dashboard/profile'));
+        setProgress(true)
+        companies.where('userEmail', '==', user.email)
+            .get().then((res) => {
+                res.docs.map(doc => {
+                    if (doc.exists) {
+                        companies.doc(doc.id).delete().then(() => {
+                            dispatch(setCompanyData(null));
+                            history.replace('/')
+                        })
+                    }
+                })
+            })
     }
+
     return (
         <Container>
             <div className="header" onClick={toggle}>
@@ -42,7 +51,7 @@ const CompanyInfo = ({ companyData, show, toggle }) => {
                         <div><h3>landline:</h3> <p>{companyData.landline}</p></div>
                         <div><h3>phoneNo:</h3> <p>{companyData.phoneNo}</p></div>
                     </Info>
-                    <RemoveCompany onClick={removeCompany} >{!progress ? 'Remove Company' : <CircularProgress size={16} />}</RemoveCompany>
+                    {/* <RemoveCompany onClick={removeCompany} >{!progress ? 'Remove Company' : <CircularProgress size={16} />}</RemoveCompany> */}
                 </>
             }
         </Container>
@@ -63,10 +72,15 @@ const Container = styled.div`
         padding:0 10px;
         background: rgb(137,166,196);
         background: linear-gradient(90deg,rgba(137,166,196,1) 0% ,rgba(137,166,196,.5) 100% );
+        cursor: pointer;
+        :hover{
+            opacity: 0.8;
+        }
     }
     >.header>h2{
         text-transform: capitalize;
     }
+
 `;
 const Info = styled.div`
     display: flex;

@@ -29,9 +29,9 @@ const HomeScreen = () => {
                 )
             }
             <Body>
-                <Left >
+                {window.innerWidth > 1100 && <Left >
                     <Slideshow />
-                </Left>
+                </Left>}
                 <Right data-aos="fade-up" data-aos-duration="1000">
                     <Categories />
                     <PinnedProfiles />
@@ -63,6 +63,9 @@ const Body = styled.div`
     margin-top:20px;
     margin:auto;
     justify-content:space-between;
+    ${() => window.innerWidth < 1100 && `
+        flex-direction:column;
+    `}
 `;
 const Left = styled.div`
     flex:.65;
@@ -81,6 +84,5 @@ const Right = styled.div`
         object-fit:contain;
         padding-right:50px;
         padding-top:50px;
-
     }
 `;

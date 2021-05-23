@@ -2,14 +2,15 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import EuroIcon from '@material-ui/icons/Euro';
 import { Button, CircularProgress } from '@material-ui/core';
-import { auth, companies } from '../utils/firebase';
+import { auth, products } from '../utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 const ProductCard = ({ id, data }) => {
     const [progress, setProgress] = useState(true);
     const [user] = useAuthState(auth);
     const deleteProduct = () => {
-        companies.doc(user.email).collection("products").doc(id).delete();
+        products.doc(id).delete();
+        // window.location.reload();
     }
     return (
         <Container>

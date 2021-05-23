@@ -1,18 +1,22 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { admin } from '../utils/firebase';
 
 const Categories = () => {
-    // const
+    const [categories, setCategories] = useState([]);
+    useEffect(() => {
+        admin.doc('data').get().then(snapshot => setCategories(snapshot.data().categories))
+    }, []);
     return (
         <Container>
             <h1>Categories</h1>
             <InnerContainer>
-                <h3>Category 1</h3>
-                <h3>Category 2</h3>
-                <h3>Category 3</h3>
-                <h3>Category 4</h3>
-                <h3>Category 5</h3>
-                <h3>Category 6</h3>
+                {/* {categories && categories.map(category => <h3>{category.name}</h3>)} */}
+                <h3>Steel & Iron Industries</h3>
+                <h3>Automobile Industries</h3>
+                <h3>Cycle parts Industries</h3>
+                <h3>Food & Beverages Industries</h3>
+                <h3>Plastic Industries</h3>
             </InnerContainer>
         </Container>
     )
@@ -25,6 +29,7 @@ const Container = styled.div`
     background-color:white;
     border-radius:10px;
     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    height:40vh;
     >h1{
         color:#383B51;
         border-top-right-radius:10px;

@@ -32,6 +32,10 @@ const EditBox = ({ userData, userId, id, type, name, title, value, immutable, se
     }
 
     useEffect(() => {
+        userData.phoneNoVerified && setOpen(false);
+    }, [userData.phoneNoVerified])
+
+    useEffect(() => {
         if (auth.currentUser) {
             auth.currentUser.emailVerified && users.doc(user.email).set({ emailVerified: true }, { merge: true })
         }
@@ -125,6 +129,9 @@ const Container = styled.div`
     >.Mui-disabled{
         color:black !important;
     }
+    ${() => window.innerWidth < 960 && `
+        flex-direction:column;
+    `}
 `;
 const Verify = styled(Button)`
     position:absolute !important;

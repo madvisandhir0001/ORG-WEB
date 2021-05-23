@@ -25,3 +25,16 @@
   color: blue !important;
   font-weight: bold !important  ;
 }
+.mui-icon-40 {
+  width: 40px !important;
+  height: 40px !important;
+  transition: all 0.3s ease-in-out !important;
+}
+
+.mui-icon-40 :hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+.admin-nav-active {
+  background-color: lightgrey;
+}

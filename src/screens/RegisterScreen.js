@@ -34,7 +34,7 @@ function RegisterScreen() {
             ref && ref.get().then(res => {
                 if (!res.exists) {
                     setProgress(true);
-                    ref.set({ name, email, phoneNo, companyName, emailVerified: false, phoneNoVerified: false }).then(() => history.replace('/')).then(() => setProgress(true))
+                    ref.set({ name, email, phoneNo, companyName, emailVerified: false, phoneNoVerified: false, role: 'users' }).then(() => history.replace('/')).then(() => setProgress(true))
                 }
             })
         }
@@ -164,22 +164,24 @@ function RegisterScreen() {
 export default RegisterScreen
 
 const SignUp = styled.div`
-display: flex;
-justify-content: center;
-margin-top:20px;
->h6{
-    margin-left: 8px;
-    color:blue;
-    line-height:25px;
-    cursor: pointer;
-}
+    display: flex;
+    justify-content: center;
+    margin-top:20px;
+    >h6{
+        margin-left: 8px;
+        color:blue;
+        line-height:25px;
+        cursor: pointer;
+    }
 `;
 const Container = styled.div`
-    height:100vh;
+    min-height:100vh;
+    height:100%;
     width:100vw;
     display:grid;
     place-items:center;
     background-color:whitesmoke;
+    overflow-y:scroll;
 `;
 
 const LoginContainer = styled.div`
@@ -193,6 +195,8 @@ const LoginContainer = styled.div`
     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
     background-color:white;
     min-height:25vh;
+    padding-bottom:100px;
+    margin:40px;
     >h1{
         margin-bottom:20px;
     }

@@ -5,12 +5,14 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Button, CircularProgress, IconButton } from '@material-ui/core';
 import AddProductImage from './AddProductImage';
-import { auth, companies, storage } from '../utils/firebase';
+import { auth, products, storage } from '../utils/firebase';
 import Error from './Error';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import firebase from 'firebase';
+import { selectCompanyData } from '../features/appSlice';
+import { useSelector } from 'react-redux';
 
-const CompanyAddProducts = ({ toggle, toggleFn, show }) => {
+const CompanyAddProducts = ({ toggle, companyData, toggleFn, show }) => {
     const [user] = useAuthState(auth);
     const [productData, setProductData] = useState({
         name: "",
@@ -38,13 +40,17 @@ const CompanyAddProducts = ({ toggle, toggleFn, show }) => {
                     .ref(`users/${user.email}/company/products/${productData.name}/${'image'}`)
                     .getDownloadURL()
                     .then(url => {
-                        companies.doc(user.email).collection('products').add({
+                        products.add({
                             name: productData.name,
                             description: productData.description,
                             price: productData.price,
+                            companyName: companyData.title,
                             image: url,
+                            email: user.email,
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true }).then(() => {
+                        },
+                            { merge: true }
+                        ).then(() => {
                             setProgress(false);
                             setFile('');
                             setProductData({ name: "", image: "", description: "", price: "" });
@@ -99,6 +105,10 @@ const Container = styled.div`
         padding:0 10px;
         background: rgb(137,166,196);
         background: linear-gradient(90deg,rgba(137,166,196,1) 0% ,rgba(137,166,196,.5) 100% );
+        cursor: pointer;
+        :hover{
+            opacity: 0.8;
+        }
     }
     >.header>h2{
         text-transform: capitalize;

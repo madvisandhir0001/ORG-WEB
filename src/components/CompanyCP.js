@@ -6,15 +6,16 @@ import CompanyAddProducts from './CompanyAddProducts';
 import CompanyInfo from './CompanyInfo'
 import CompanyProducts from './CompanyProducts';
 
-const CompanyCP = () => {
-    const companyData = useSelector(selectCompanyData);
+const CompanyCP = ({ companyData }) => {
+    // const companyData = useSelector(selectCompanyData);
+    console.log(companyData);
 
     const [show, setShow] = useState(-1);
     const toggle = (i) => (show === i) ? setShow(-1) : setShow(i);
 
     return (
         <Container>
-            <h1>{companyData.title.toUpperCase()}</h1>
+            <h1>{companyData?.title.toUpperCase()}</h1>
             <CompanyInfo companyData={companyData} show={show} toggle={() => toggle(0)} />
             <CompanyProducts companyData={companyData} show={show} toggle={() => toggle(1)} />
             <CompanyAddProducts companyData={companyData} show={show} toggleFn={toggle} toggle={() => toggle(2)} />
